@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<dataset>
+	<Contact
+			firstName="Guillaume"
+			lastName="Wallet"
+			email="wallet.guillaume@gmail.com"/>
+</dataset>
