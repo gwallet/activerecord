@@ -66,7 +66,7 @@ public abstract class ActiveRecord<T extends ActiveRecord>
         return args;
     }
 
-    public <T> List<T> findCorresponding( DataSource dataSource )
+    public List<T> findCorresponding( DataSource dataSource )
         throws SQLException
     {
         try {
@@ -87,14 +87,15 @@ public abstract class ActiveRecord<T extends ActiveRecord>
                     for (Field field : fields ) {
                         field.setAccessible(true);
                         args[index++] = field.get( this );
-                        preparedStatement.setObject(index, args[index - 1] );
+                        if (args[index - 1] != null) {
+                            preparedStatement.setObject(index, args[index - 1] );
+                        }
                     }
                     log.debug("Execute query '{}' with values {}", query, args);
                     try (ResultSet resultSet = preparedStatement.executeQuery()) {
                         ArrayList<T> results = new ArrayList<>();
                         while (resultSet.next()) {
-                            @SuppressWarnings("unchecked")
-                            T instance = (T) clazz.newInstance();
+                            T instance = clazz.newInstance();
                             index = 1;
                             for (Field field : fields ) {
                                 field.setAccessible(true);

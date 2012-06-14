@@ -14,18 +14,9 @@ import static org.dbunit.Assertion.assertEquals;
 import static org.fest.assertions.Assertions.assertThat;
 
 @Slf4j
-public class ReadTestCase
+public class ReadOneTestCase
     extends AbstractCRUDTestCase
 {
-    @Before
-    public void loadDataBase()
-        throws Exception
-    {
-        IDataSet actualDataSet = new DatabaseDataSet(getDatabaseConnection(), false);
-        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(new File("src/test/resources/expectedContact.xml"));
-        assertEquals( expectedDataSet.getTable("contact"), actualDataSet.getTable("contact") );
-    }
-
     @Test
     public void canFindInDB()
         throws Exception
