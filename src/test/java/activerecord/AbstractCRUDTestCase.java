@@ -22,16 +22,6 @@ public abstract class AbstractCRUDTestCase
 {
     protected DataSource dataSource;
 
-    @Data
-    @EqualsAndHashCode(callSuper = false)
-    static class Contact
-        extends ActiveRecord<Contact>
-    {
-        private String firstName;
-        private String lastName;
-        private String email;
-    }
-
     @Before
     public void setUpDatabase()
         throws Exception

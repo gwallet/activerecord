@@ -2,7 +2,9 @@ package activerecord;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import lombok.extern.slf4j.Slf4j;
+import com.google.common.base.Stopwatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,83 +20,81 @@ import java.util.List;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 
-@Slf4j
 public abstract class ActiveRecord<T extends ActiveRecord>
 {
     @Nonnull
     @SuppressWarnings("unchecked")
     private Class<T> clazz = (Class<T>) getClass();
 
+    private static final Stopwatch stopwatch = new Stopwatch();
+
+    private Logger logger() {
+        return LoggerFactory.getLogger(getClass());
+    }
+
     public void save( DataSource dataSource )
         throws SQLException
     {
         try (Connection connection = dataSource.getConnection()) {
-            String query = buildQuery();
+            InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder().insertInto( getClass().getSimpleName() );
+            ArrayList<Object> args = new ArrayList<>();
+            try {
+                for (Field field : getClass().getDeclaredFields()) {
+                    field.setAccessible(true);
+                    args.add(field.get(this));
+                    insertQueryBuilder.addColumn( field.getName() );
+                }
+            } catch ( IllegalAccessException cause ) {
+                throw new RuntimeException("Unable to build insertion query", cause);
+            }
+            String query =  insertQueryBuilder.build();
             try (PreparedStatement statement = connection.prepareStatement( query )) {
-                Object[] args = populate(statement);
-                log.debug("Execute query '{}' with values {}", query, args);
+                int index = 1;
+                for (Object arg : args) {
+                    statement.setObject(index++, arg);
+                }
+                logger().debug("Executing query '{}' with values {}", query, args);
+                stopwatch.reset().start();
                 statement.executeUpdate();
+                stopwatch.stop();
+                logger().info( "Executed query '{}' with values {} in {} ms", new Object[] { query, args, stopwatch.elapsedMillis() } );
             }
         }
     }
 
-    private String buildQuery()
-    {
-        InsertQueryBuilder insertQueryBuilder = new InsertQueryBuilder().insertInto( getClass().getSimpleName() );
-        for (Field field : getClass().getDeclaredFields()) {
-            insertQueryBuilder.addColumn( field.getName() );
-        }
-        return insertQueryBuilder.build();
-    }
-
-    private Object[] populate( PreparedStatement statement )
+    public List<T> find( DataSource dataSource )
         throws SQLException
     {
-        int index = 0;
-        Object[] args;
+        SelectQueryBuilder queryBuilder = new SelectQueryBuilder().selectFrom( clazz );
+        Field[] fields = clazz.getDeclaredFields();
+        ArrayList<Object> args = new ArrayList<>();
         try {
-            Field[] fields = getClass().getDeclaredFields();
-            args = new Object[fields.length];
-            for ( Field field : fields ) {
-                field.setAccessible(true);
-                args[index++] = field.get(this);
-                statement.setObject(index, args[index - 1]);
-            }
-        } catch ( IllegalAccessException cause ) {
-            throw new RuntimeException("Unable to populate query :'(", cause);
-        }
-        return args;
-    }
-
-    public List<T> findCorresponding( DataSource dataSource )
-        throws SQLException
-    {
-        try {
-            SelectQueryBuilder queryBuilder = new SelectQueryBuilder().selectFrom( clazz );
-            Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields ) {
                 field.setAccessible(true);
                 Object arg = field.get( this );
                 if ( arg != null) {
                     queryBuilder.where( field.getName() );
+                    args.add(arg);
                 }
             }
-            String query = queryBuilder.build();
-            try (Connection connection = dataSource.getConnection()) {
-                try (PreparedStatement preparedStatement = connection.prepareStatement( query )) {
-                    int index = 0;
-                    Object[] args = new Object[fields.length];
-                    for (Field field : fields ) {
-                        field.setAccessible(true);
-                        args[index++] = field.get( this );
-                        if (args[index - 1] != null) {
-                            preparedStatement.setObject(index, args[index - 1] );
-                        }
-                    }
-                    log.debug("Execute query '{}' with values {}", query, args);
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        ArrayList<T> results = new ArrayList<>();
-                        while (resultSet.next()) {
+        } catch (IllegalAccessException cause) {
+            throw new RuntimeException("Unable to build selection query", cause);
+        }
+        String query = queryBuilder.build();
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement( query )) {
+                int index = 1;
+                for (Object arg : args ) {
+                    preparedStatement.setObject(index++, arg );
+                }
+                logger().debug("Executing query '{}' with values {}", query, args);
+                stopwatch.reset().start();
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    stopwatch.stop();
+                    logger().info( "Executed query '{}' with values {} in {} ms", new Object []{query, args, stopwatch.elapsedMillis()});
+                    ArrayList<T> results = new ArrayList<>();
+                    while (resultSet.next()) {
+                        try {
                             T instance = clazz.newInstance();
                             index = 1;
                             for (Field field : fields ) {
@@ -102,13 +102,13 @@ public abstract class ActiveRecord<T extends ActiveRecord>
                                 field.set( instance, resultSet.getObject(index++ ) );
                             }
                             results.add(instance);
+                        } catch (IllegalAccessException|InstantiationException cause) {
+                            throw new RuntimeException("Unable to execute selection query", cause);
                         }
-                        return results;
                     }
+                    return results;
                 }
             }
-        } catch (IllegalAccessException|InstantiationException cause) {
-            throw new RuntimeException("Unable to execute select query", cause);
         }
     }
 

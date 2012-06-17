@@ -21,7 +21,7 @@ public class ReadMultipleTestCase
         Contact expectedContact = new Contact();
         expectedContact.setFirstName( "Guillaume" );
         log.debug( "Reading contacts ..." );
-        List<Contact> contacts = expectedContact.findCorresponding(dataSource);
+        List<Contact> contacts = expectedContact.find( dataSource );
         log.debug( "{} contacts read : {}", contacts.size(), contacts );
         assertThat(contacts).hasSize(3);
     }
