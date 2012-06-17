@@ -8,7 +8,6 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
-import static org.dbunit.Assertion.assertEquals;
 import static org.fest.assertions.Assertions.assertThat;
 
 @Slf4j

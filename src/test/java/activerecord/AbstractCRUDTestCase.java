@@ -1,8 +1,6 @@
 package activerecord;
 
 import com.googlecode.flyway.core.Flyway;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConnection;
@@ -15,7 +13,6 @@ import org.junit.Before;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.List;
 
 @Slf4j
 public abstract class AbstractCRUDTestCase

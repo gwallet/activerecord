@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<dataset>
+	<table name="Contact">
+		<column>firstName</column>
+		<column>lastName</column>
+		<column>email</column>
+	</table>
+</dataset>
