@@ -10,5 +10,5 @@
 	<root level="error">
 		<appender-ref ref="console"/>
 	</root>
-	<logger name="activerecord" level="debug"/>
+	<logger name="activerecord" level="error"/>
 </configuration>

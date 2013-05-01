@@ -223,12 +223,11 @@ public abstract class ActiveRecord<T extends ActiveRecord>
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 bindArguments(statement, args);
-                stopwatch.reset().start();
                 logger().debug( "Executing query '{}' with arguments {}", query, args );
+                stopwatch.reset().start();
                 statement.executeUpdate();
                 stopwatch.stop();
                 logger().info( "Executed query '{}' with arguments {} in {} ms", new Object []{query, args, stopwatch.elapsedMillis()});
-
             }
         }
     }

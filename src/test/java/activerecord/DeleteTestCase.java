@@ -17,12 +17,6 @@ import static org.dbunit.Assertion.assertEquals;
 public class DeleteTestCase
     extends AbstractCRUDTestCase
 {
-    protected IDataSet getDataSet()
-            throws MalformedURLException, DataSetException
-    {
-        return new FlatXmlDataSetBuilder().build(new File("src/test/resources/expectedContact.xml"));
-    }
-
     @Test
     public void canDelete()
         throws Exception
@@ -37,5 +31,11 @@ public class DeleteTestCase
         IDataSet expectedDataSet = new XmlDataSet(DeleteTestCase.class.getResourceAsStream("/emptyContact.xml"));
         assertEquals( expectedDataSet.getTable("contact"), actualDataSet.getTable("contact") );
         log.debug("Contact deleted.");
+    }
+
+    protected IDataSet getDataSet()
+            throws Exception
+    {
+        return new FlatXmlDataSetBuilder().build(new File("src/test/resources/oneContact.xml"));
     }
 }

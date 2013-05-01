@@ -11,7 +11,7 @@ import java.io.File;
 import static org.dbunit.Assertion.assertEquals;
 
 @Slf4j
-public class SaveTestCase
+public class CreateTestCase
     extends AbstractCRUDTestCase
 {
     @Test
@@ -25,7 +25,7 @@ public class SaveTestCase
         log.debug("Saving contact {}", contact);
         contact.save(dataSource);
         IDataSet actualDataSet = new DatabaseDataSet(getDatabaseConnection(), false);
-        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(new File("src/test/resources/expectedContact.xml"));
+        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(new File("src/test/resources/oneContact.xml"));
         assertEquals( expectedDataSet.getTable("contact"), actualDataSet.getTable("contact") );
         log.debug("Contact saved.");
     }
