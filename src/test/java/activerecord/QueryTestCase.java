@@ -44,4 +44,16 @@ public class QueryTestCase
         String expected = "DELETE FROM Contact WHERE firstName = ? AND lastName = ? AND email = ?";
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    public void canBuildUpdateOrder() {
+        String actual = Query.update("Contact")
+                .set("firstName", "?")
+                .set("lastName", "?")
+                .set("email", "?")
+                .where("id").isEqualTo("?")
+                .toString();
+        String expected = "UPDATE Contact SET firstName = ?, lastName = ?, email = ? WHERE id = ?";
+        assertThat(actual).isEqualTo(expected);
+    }
 }

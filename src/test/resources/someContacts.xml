@@ -1,15 +1,18 @@
 <?xml version="1.0" ?>
 <dataset>
 	<Contact
-			firstName="Guillaume"
-			lastName="Wallet"
-			email="wallet.guillaume@gmail.com"/>
+        id="1"
+        firstName="Guillaume"
+        lastName="Wallet"
+        email="wallet.guillaume@gmail.com"/>
 	<Contact
-			firstName="Guillaume"
-			lastName="Apollinaire"
-			email="apollinaire.guillaume@pere-lachaise.fr"/>
+        id="2"
+        firstName="Guillaume"
+        lastName="Apollinaire"
+        email="apollinaire.guillaume@pere-lachaise.fr"/>
 	<Contact
-			firstName="Guillaume"
-			lastName="Tell"
-			email="tell.guillaume@uri.ch"/>
+        id="3"
+        firstName="Guillaume"
+        lastName="Tell"
+        email="tell.guillaume@uri.ch"/>
 </dataset>

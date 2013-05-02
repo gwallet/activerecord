@@ -1,0 +1,54 @@
+<html>
+<body>
+<h1><a href="http://en.wikipedia.org/wiki/Active_record_pattern">Active Record design pattern</a> basic Java implementation.</h1>
+<h2>How It Works</h2>
+<p>Active record objects are instances of classes declared like this:</p>
+<pre>
+import {@linkplain activerecord.ActiveRecord activerecord.ActiveRecord};
+import {@linkplain activerecord.annotation.PrimaryKey activerecord.annotation.PrimaryKey};
+
+public class Contact
+  extends {@linkplain activerecord.ActiveRecord}&lt;Contact>
+{
+  {@literal @}PrimaryKey
+  private Integer id;
+  private String firstName;
+  private String lastName;
+  private String email;
+}
+</pre>
+<p>
+In this way, you can <a href="#create-update">insert or update</a>, <a href="#read">find</a>
+and <a href="#delete">delete</a> rows in database with the inherited methods.
+</p>
+<h2><a name="create-update">Create / Update</a></h2>
+To create or update, simply create an instance like anyone in Java, then store it in database like this :
+<pre>
+ Contact contact = new Contact();
+ // ...
+ // populate fields
+ // ...
+ contact.save( dataSource );
+ </pre>
+The database is now up to date or contains a new row.
+<h2><a name="read">Find</a></h2>
+To find instances, simply create a candidate instance with some required field and then find equivalent in database like this :
+<pre>
+ Contact candidate = new Contact();
+ // ...
+ // populate matching fields
+ // ...
+ List&lt;Contact> contacts = candidate.find( dataSource );
+ </pre>
+The list <code>contacts</code> contains all found contact in database corresponding to the given <code>candidate</code>.
+<h2><a name="delete">Delete</a></h2>
+To delete a row, simply create a corresponding candidate and then delete it like this :
+<pre>
+ Contact candidate = new Contact();
+ // ...
+ // populate matching fields
+ // ...
+ candidate.delete( dataSource );
+ </pre>
+</body>
+</html>

@@ -2,8 +2,7 @@ package activerecord;
 
 import com.google.common.base.Joiner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 class Query
 {
@@ -25,6 +24,10 @@ class Query
     static WhereQuery where( String name )
     {
         return new WhereQuery("", name);
+    }
+
+    public static UpdateQuery update( String tableName ) {
+        return new UpdateQuery( tableName );
     }
 
     static class SelectionQuery
@@ -142,6 +145,41 @@ class Query
         {
             values.add(value);
             return this;
+        }
+    }
+
+    static class UpdateQuery
+    {
+        private String table;
+        private LinkedHashMap<String, String> setClause = new LinkedHashMap<>();
+
+        UpdateQuery(String table) {
+            this.table = table;
+        }
+
+        UpdateQuery set(String column, String value) {
+            setClause.put(column, value);
+            return this;
+        }
+
+        WhereQuery where( String firstColumn ) {
+            return new WhereQuery( toString(), firstColumn );
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder buffer = new StringBuilder("UPDATE " + table + " SET ");
+            Iterator<Map.Entry<String, String>> columnsIterator = setClause.entrySet().iterator();
+            while ( columnsIterator.hasNext() ) {
+                Map.Entry<String, String> column = columnsIterator.next();
+                buffer.append(column.getKey());
+                buffer.append(" = ");
+                buffer.append(column.getValue());
+                if (columnsIterator.hasNext()) {
+                    buffer.append(", ");
+                }
+            }
+            return buffer.toString();
         }
     }
 }

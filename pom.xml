@@ -9,6 +9,10 @@
     <artifactId>activerecord</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <name>Active Record</name>
+    <description>Simplest C.R.U.D. framework in Java inspired from Active Record design pattern.</description>
+    <url>https://github.com/gwallet/activerecord</url>
+    <inceptionYear>2012</inceptionYear>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
