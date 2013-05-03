@@ -59,6 +59,9 @@ public abstract class AbstractCRUDTestCase
         }
     }
 
+    /**
+     * Override to fulfill database at setup.
+     */
     protected IDataSet getDataSet()
         throws Exception
     {
@@ -83,11 +86,15 @@ public abstract class AbstractCRUDTestCase
         assertEquals(expectedDataSet.getTable(tableName), actualDataSet.getTable(tableName));
     }
 
-    protected XmlDataSet loadXmlDataSet(String resourceName) throws DataSetException, IOException {
+    protected IDataSet loadXmlDataSet(String resourceName)
+        throws DataSetException, IOException
+    {
         return new XmlDataSet(Resources.getResource(resourceName).openStream());
     }
 
-    protected IDataSet loadFlatXmlDataSet(String resourceName) throws DataSetException {
+    protected IDataSet loadFlatXmlDataSet(String resourceName)
+        throws DataSetException
+    {
         return new FlatXmlDataSetBuilder().build(Resources.getResource(resourceName));
     }
 }

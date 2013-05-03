@@ -1,9 +1,7 @@
 package activerecord;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
-@Slf4j
 public class CreateTestCase
     extends AbstractCRUDTestCase
 {
@@ -12,12 +10,10 @@ public class CreateTestCase
         throws Exception
     {
         Contact contact = new Contact();
-        contact.setFirstName( "Guillaume" );
-        contact.setLastName( "Wallet" );
-        contact.setEmail( "wallet.guillaume@gmail.com" );
-        log.debug("Saving contact {}", contact);
+        contact.setFirstName("Guillaume");
+        contact.setLastName("Wallet");
+        contact.setEmail("wallet.guillaume@gmail.com");
         contact.save(dataSource);
         expectTableContent("contact", "oneContact.xml");
-        log.debug("Contact saved.");
     }
 }

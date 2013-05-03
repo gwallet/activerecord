@@ -1,0 +1,10 @@
+<!ELEMENT dataset (ContactGroup*,Contact+)>
+<!ELEMENT ContactGroup EMPTY>
+<!ATTLIST ContactGroup id CDATA #REQUIRED>
+<!ATTLIST ContactGroup name CDATA #IMPLIED>
+<!ELEMENT Contact EMPTY>
+<!ATTLIST Contact id CDATA #REQUIRED>
+<!ATTLIST Contact firstName CDATA #IMPLIED>
+<!ATTLIST Contact lastName CDATA #IMPLIED>
+<!ATTLIST Contact email CDATA #IMPLIED>
+<!ATTLIST Contact groupId CDATA #IMPLIED>

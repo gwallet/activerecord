@@ -1,5 +1,6 @@
 package activerecord;
 
+import activerecord.annotation.OneToMany;
 import activerecord.annotation.PrimaryKey;
 import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
@@ -12,7 +13,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import static com.google.common.base.Throwables.propagate;
 
 /**
  * The main purpose of this class is to managed the database relationship of sub-classes instances.
@@ -208,39 +212,54 @@ public abstract class ActiveRecord<T extends ActiveRecord>
                     stopwatch.stop();
                     logger().info( "Executed query '{}' with values {} in {} ms", new Object []{ query, args, stopwatch.elapsedMillis() } );
                     ArrayList<T> results = new ArrayList<>();
-                    createResultsFromResultSet( resultSet, results );
+                    createResultsFromResultSet( clazz, resultSet, results, dataSource );
                     return results;
                 }
             }
         }
     }
 
-    private void createResultsFromResultSet( ResultSet resultSet, ArrayList<T> results )
+    private <I> void createResultsFromResultSet( Class<I> clazz, ResultSet resultSet, ArrayList<I> results, DataSource dataSource )
         throws SQLException
     {
         while ( resultSet.next() ) {
-            results.add( createResultFromRow( resultSet ) );
+            results.add( createResultFromRow( clazz, resultSet, dataSource ) );
         }
     }
 
-    private T createResultFromRow( ResultSet resultSet )
+    private <I> I createResultFromRow( Class<I> clazz, ResultSet resultSet, DataSource dataSource )
         throws SQLException
     {
         try {
-            return createResultFromRowWithError( resultSet );
-        } catch ( IllegalAccessException|InstantiationException cause ) {
+            return createResultFromRowWithError( clazz, resultSet, dataSource );
+        } catch ( IllegalAccessException|InstantiationException|NoSuchFieldException cause ) {
             throw new RuntimeException("Unable to execute selection query", cause);
         }
     }
 
-    private T createResultFromRowWithError( ResultSet resultSet )
-        throws SQLException, IllegalAccessException, InstantiationException
+    private <I> I createResultFromRowWithError( Class<I> clazz, ResultSet resultSet, DataSource dataSource )
+        throws SQLException, IllegalAccessException, InstantiationException, NoSuchFieldException
     {
-        T instance = clazz.newInstance();
+        I instance = clazz.newInstance();
         int index = 1;
+        Object primaryKeyValue = null;
         for ( Field field : clazz.getDeclaredFields() ) {
             field.setAccessible( true );
-            field.set( instance, resultSet.getObject( index++ ) );
+            OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+            if ( oneToMany != null ) {
+                final Class<? extends ActiveRecord> targetClazz = oneToMany.targetType();
+                ActiveRecord sample = targetClazz.newInstance();
+                Field targetForeignKey = targetClazz.getDeclaredField(oneToMany.targetForeignKey());
+                targetForeignKey.setAccessible( true );
+                targetForeignKey.set( sample, primaryKeyValue );
+                field.set( instance, sample.find( dataSource ) );
+            } else {
+                Object value = resultSet.getObject( index++ );
+                field.set( instance, value );
+                if ( field.getAnnotation( PrimaryKey.class ) != null ) {
+                    primaryKeyValue = value;
+                }
+            }
         }
         return instance;
     }
@@ -250,8 +269,10 @@ public abstract class ActiveRecord<T extends ActiveRecord>
         try {
             Query.SelectionQuery select = null;
             Query.WhereQuery whereClause = null;
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields ) {
+            for ( Field field : clazz.getDeclaredFields() ) {
+                if ( field.getAnnotation( OneToMany.class ) != null ) {
+                    continue;
+                }
                 field.setAccessible(true);
                 Object arg = field.get( this );
                 String fieldName = field.getName();

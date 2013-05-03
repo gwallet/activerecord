@@ -1,19 +1,25 @@
 <?xml version="1.0" ?>
 <!DOCTYPE dataset SYSTEM "test-dataset.dtd">
 <dataset>
+    <ContactGroup
+        id="1"
+        name="mainGroup"/>
 	<Contact
         id="1"
         firstName="Guillaume"
         lastName="Wallet"
-        email="wallet.guillaume@gmail.com"/>
+        email="wallet.guillaume@gmail.com"
+        groupId="1"/>
 	<Contact
         id="2"
         firstName="Guillaume"
         lastName="Apollinaire"
-        email="apollinaire.guillaume@pere-lachaise.fr"/>
+        email="apollinaire.guillaume@pere-lachaise.fr"
+        groupId="1"/>
 	<Contact
         id="3"
         firstName="Guillaume"
         lastName="Tell"
-        email="tell.guillaume@uri.ch"/>
+        email="tell.guillaume@uri.ch"
+        groupId="1"/>
 </dataset>
