@@ -15,6 +15,7 @@ public class Contact
   private String firstName;
   private String lastName;
   private String email;
+  private Integer groupId; // See <a href="#one2many">one to many relationship</a> usage.
 }
 </pre>
 <p>
@@ -50,5 +51,53 @@ To delete a row, simply create a corresponding candidate and then delete it like
  // ...
  candidate.delete();
  </pre>
+<h2><a name="one2many">One to many relationship</a></h2>
+<p>In case of a one to many relation ship, populate the one in order to simplify the usage like this:</p>
+<pre>
+import {@linkplain activerecord.ActiveRecord activerecord.ActiveRecord};
+import {@linkplain activerecord.annotation.PrimaryKey activerecord.annotation.PrimaryKey};
+
+public class ContactGroup
+    extends ActiveRecord&lt;ContactGroup>
+{
+  {@literal @}PrimaryKey
+  private Integer id;
+  private String name;
+
+  public void addContact( Contact contact )
+    throws SQLException
+  {
+    contact.setGroupId( id );
+    contact.save();
+  }
+
+  public List&lt;Contact> getContacts()
+    throws SQLException
+  {
+    Contact sample = new Contact();
+    sample.setGroupId( id );
+    return sample.find();
+  }
+
+  public void removeContact( Contact contact )
+    throws SQLException
+  {
+    contact.setGroupId( null );
+    contact.save();
+  }
+}
+</pre>
+<p>In order to manage contacts in a group, it's just simple like this:</p>
+<pre>
+ ContactGroup group = ...
+ // ...
+ // find or create a group to modify
+ // ...
+ Contact contact = ...
+ // ...
+ // find or create a contact to manage
+ // ...
+ group.addContact( contact );
+</pre>
 </body>
 </html>

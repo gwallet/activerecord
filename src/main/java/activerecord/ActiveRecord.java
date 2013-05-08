@@ -5,7 +5,6 @@ import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,23 +18,23 @@ import java.util.List;
  *
  * <p>Active record objects are instances of classes declared like this:</p>
  * <pre>
- * import activerecord.ActiveRecord;
- * import activerecord.annotation.PrimaryKey;
+ * import {@link activerecord.ActiveRecord activerecord.ActiveRecord};
+ * import {@link activerecord.annotation.PrimaryKey activerecord.annotation.PrimaryKey};
  *
  * public class Contact
- *     extends ActiveRecord&lt;Contact>
+ *   extends {@link activerecord.ActiveRecord}&lt;Contact>
  * {
- *     {@literal @}PrimaryKey
- *     private Integer id;
- *     private String firstName;
- *     private String lastName;
- *     private String email;
+ *   {@literal @}PrimaryKey
+ *   private Integer id;
+ *   private String firstName;
+ *   private String lastName;
+ *   private String email;
+ *   private Integer groupId; // See one to many relationship usage below.
  * }
  * </pre>
  * <p>
- *     In this way, you can {@linkplain #save() insert/update},
- *     {@linkplain #find() find} and
- *     {@linkplain #delete() delete} rows in database with the inherited methods.
+ *   In this way, you can {@linkplain #save() insert/update}, {@linkplain #find() find} and
+ *   {@linkplain #delete() delete} rows in database with the inherited methods.
  * </p>
  * <h2>Create / Update</h2>
  * To create or update, simply create an instance like anyone in Java, then store it in database like this :
@@ -67,6 +66,54 @@ import java.util.List;
  * candidate.delete();
  * </pre>
  * The corresponding row never exist in database.
+ * <h2>One to many relationship</h2>
+ * <p>In case of a one to many relation ship, populate the one in order to simplify the usage like this:</p>
+ * <pre>
+ * import {@linkplain activerecord.ActiveRecord activerecord.ActiveRecord};
+ * import {@linkplain activerecord.annotation.PrimaryKey activerecord.annotation.PrimaryKey};
+ *
+ * public class ContactGroup
+ * extends ActiveRecord&lt;ContactGroup>
+ * {
+ *   {@literal @}PrimaryKey
+ *   private Integer id;
+ *   private String name;
+ *
+ *   public void addContact( Contact contact )
+ *     throws SQLException
+ *   {
+ *     contact.setGroupId( id );
+ *     contact.save();
+ *   }
+ *
+ *   public List&lt;Contact> getContacts()
+ *     throws SQLException
+ *   {
+ *     Contact sample = new Contact();
+ *     sample.setGroupId( id );
+ *     return sample.find();
+ *   }
+ *
+ *   public void removeContact( Contact contact )
+ *     throws SQLException
+ *   {
+ *     contact.setGroupId( null );
+ *     contact.save();
+ *   }
+ * }
+ * </pre>
+ * <p>In order to manage contacts in a group, it's just simple like this:</p>
+ * <pre>
+ * ContactGroup group = ...
+ * // ...
+ * // find or create a group to modify
+ * // ...
+ * Contact contact = ...
+ * // ...
+ * // find or create a contact to manage
+ * // ...
+ * group.addContact( contact );
+ * </pre>
  *
  * @see <a href="http://en.wikipedia.org/wiki/Active_record_pattern">Active record design pattern</a>
  * @param <T> Type of managed active record.

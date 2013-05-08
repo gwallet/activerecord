@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * The <code>PrimaryKey</code> annotation indicates to the framework that a field
  * maps a column that has a primary key constraint. It is used to update existing
- * record with {@link activerecord.ActiveRecord#save(javax.sql.DataSource)} method.
+ * record with {@link activerecord.ActiveRecord#save()} method.
  *
  * <p>To tag a field as primary key, just add the annotation like that :</p>
  * <pre>
@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  *     <ol>The primary key MUST NOT be set if you want to create another record, and the corresponding column
  *     MUST have an auto generated mechanism to create a default value (link auto increment, sequence, ...)</ol>
  * </ul>
- * @see activerecord.ActiveRecord#save(javax.sql.DataSource) The insert/update routine.
+ * @see activerecord.ActiveRecord#save() The insert/update routine.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
