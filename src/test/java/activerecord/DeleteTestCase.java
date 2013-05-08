@@ -14,7 +14,7 @@ public class DeleteTestCase
         contact.setFirstName("Guillaume");
         contact.setLastName("Wallet");
         contact.setEmail("wallet.guillaume@gmail.com");
-        contact.delete(dataSource);
+        contact.delete();
         expectTableContent("contact", loadXmlDataSet("emptyContact.xml"));
     }
 

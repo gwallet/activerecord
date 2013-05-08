@@ -13,7 +13,7 @@ public class CreateTestCase
         contact.setFirstName("Guillaume");
         contact.setLastName("Wallet");
         contact.setEmail("wallet.guillaume@gmail.com");
-        contact.save(dataSource);
+        contact.save();
         expectTableContent("contact", "oneContact.xml");
     }
 }

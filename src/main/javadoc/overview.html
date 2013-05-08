@@ -28,7 +28,7 @@ To create or update, simply create an instance like anyone in Java, then store i
  // ...
  // populate fields
  // ...
- contact.save( dataSource );
+ contact.save();
  </pre>
 The database is now up to date or contains a new row.
 <h2><a name="read">Find</a></h2>
@@ -38,7 +38,7 @@ To find instances, simply create a candidate instance with some required field a
  // ...
  // populate matching fields
  // ...
- List&lt;Contact> contacts = candidate.find( dataSource );
+ List&lt;Contact> contacts = candidate.find();
  </pre>
 The list <code>contacts</code> contains all found contact in database corresponding to the given <code>candidate</code>.
 <h2><a name="delete">Delete</a></h2>
@@ -48,7 +48,7 @@ To delete a row, simply create a corresponding candidate and then delete it like
  // ...
  // populate matching fields
  // ...
- candidate.delete( dataSource );
+ candidate.delete();
  </pre>
 </body>
 </html>

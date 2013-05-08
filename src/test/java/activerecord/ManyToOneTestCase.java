@@ -12,8 +12,8 @@ public class ManyToOneTestCase
     public void canGetManyToOneRelationship() throws Exception {
         Contact sample = new Contact();
         sample.setId(1);
-        Contact contact = sample.find( dataSource ).get(0);
-        ContactGroup group = contact.getGroup( dataSource );
+        Contact contact = sample.find().get(0);
+        ContactGroup group = contact.getGroup();
         assertThat(group.getId()).isEqualTo(1);
         assertThat(group.getName()).isEqualTo("mainGroup");
     }

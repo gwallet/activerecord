@@ -12,9 +12,9 @@ public class UpdateTestCase
     {
         Contact sample = new Contact();
         sample.setId( 1 );
-        Contact contact = sample.find( dataSource ).get( 0 );
+        Contact contact = sample.find().get( 0 );
         contact.setEmail("guillaume.wallet@gmail.com");
-        contact.save(dataSource);
+        contact.save();
         expectTableContent("contact", "anotherContact.xml");
     }
 

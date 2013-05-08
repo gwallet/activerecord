@@ -33,9 +33,9 @@ import java.util.List;
  * }
  * </pre>
  * <p>
- *     In this way, you can {@linkplain #save(javax.sql.DataSource) insert/update},
- *     {@linkplain #find(javax.sql.DataSource) find} and
- *     {@linkplain #delete(javax.sql.DataSource) delete} rows in database with the inherited methods.
+ *     In this way, you can {@linkplain #save() insert/update},
+ *     {@linkplain #find() find} and
+ *     {@linkplain #delete() delete} rows in database with the inherited methods.
  * </p>
  * <h2>Create / Update</h2>
  * To create or update, simply create an instance like anyone in Java, then store it in database like this :
@@ -44,7 +44,7 @@ import java.util.List;
  * // ...
  * // populate fields
  * // ...
- * contact.save( dataSource );
+ * contact.save();
  * </pre>
  * The database is now up to date or contains a new row.
  * <h2>Find</h2>
@@ -54,7 +54,7 @@ import java.util.List;
  * // ...
  * // populate matching fields
  * // ...
- * List&lt;Contact> contacts = candidate.find( dataSource );
+ * List&lt;Contact> contacts = candidate.find();
  * </pre>
  * The list <code>contacts</code> contains all found contact in database corresponding to the given <code>candidate</code>.
  * <h2>Delete</h2>
@@ -64,7 +64,7 @@ import java.util.List;
  * // ...
  * // populate matching fields
  * // ...
- * candidate.delete( dataSource );
+ * candidate.delete();
  * </pre>
  * The corresponding row never exist in database.
  *
@@ -73,6 +73,9 @@ import java.util.List;
  */
 public abstract class ActiveRecord<T extends ActiveRecord>
 {
+    /** A single database connection. */
+    public static Connection connection;
+
     @SuppressWarnings("unchecked")
     private Class<T> clazz = (Class<T>) getClass();
 
@@ -89,13 +92,12 @@ public abstract class ActiveRecord<T extends ActiveRecord>
      * // ...
      * // populate fields
      * // ...
-     * contact.save( dataSource );
+     * contact.save();
      * </pre>
      * The database is now up to date or contains a new row.
-     * @param dataSource Previously configured target database connection.
      * @throws SQLException This may failed, sorry.
      */
-    public void save( DataSource dataSource )
+    public void save()
         throws SQLException
     {
         ArrayList<Object> args = new ArrayList<>();
@@ -105,15 +107,13 @@ public abstract class ActiveRecord<T extends ActiveRecord>
         } else {
             query = buildInsertionQuery( args );
         }
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement( query )) {
-                bindArguments( statement, args );
-                logger().debug("Executing query '{}' with values {}", query, args);
-                stopwatch.reset().start();
-                statement.executeUpdate();
-                stopwatch.stop();
-                logger().info( "Executed query '{}' with values {} in {} ms", new Object[] { query, args, stopwatch.elapsedMillis() } );
-            }
+        try (PreparedStatement statement = connection.prepareStatement( query )) {
+            bindArguments( statement, args );
+            logger().debug("Executing query '{}' with values {}", query, args);
+            stopwatch.reset().start();
+            statement.executeUpdate();
+            stopwatch.stop();
+            logger().info( "Executed query '{}' with values {} in {} ms", new Object[] { query, args, stopwatch.elapsedMillis() } );
         }
     }
 
@@ -186,54 +186,51 @@ public abstract class ActiveRecord<T extends ActiveRecord>
      * // ...
      * // populate matching fields
      * // ...
-     * List&lt;Contact> contacts = candidate.find( dataSource );
+     * List&lt;Contact> contacts = candidate.find();
      * </pre>
      * The list <code>contacts</code> contains all found contact in database corresponding to the given <code>candidate</code>.
-     * @param dataSource Previously configured target database connection.
      * @return Return a list containing all the corresponding instance found in database. If no corresponding instance can
      * be found, an empty list is return.
      * @throws SQLException This may failed, sorry.
      */
-    public List<T> find( DataSource dataSource )
+    public List<T> find()
         throws SQLException
     {
         ArrayList<Object> args = new ArrayList<>();
         String query = buildSelectionQuery( args );
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement( query )) {
-                bindArguments( statement, args );
-                logger().debug("Executing query '{}' with values {}", query, args);
-                stopwatch.reset().start();
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    stopwatch.stop();
-                    logger().info( "Executed query '{}' with values {} in {} ms", new Object []{ query, args, stopwatch.elapsedMillis() } );
-                    ArrayList<T> results = new ArrayList<>();
-                    createResultsFromResultSet( clazz, resultSet, results, dataSource );
-                    return results;
-                }
+        try (PreparedStatement statement = connection.prepareStatement( query )) {
+            bindArguments( statement, args );
+            logger().debug("Executing query '{}' with values {}", query, args);
+            stopwatch.reset().start();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                stopwatch.stop();
+                logger().info( "Executed query '{}' with values {} in {} ms", new Object []{ query, args, stopwatch.elapsedMillis() } );
+                ArrayList<T> results = new ArrayList<>();
+                createResultsFromResultSet( clazz, resultSet, results );
+                return results;
             }
         }
     }
 
-    private <I> void createResultsFromResultSet( Class<I> clazz, ResultSet resultSet, ArrayList<I> results, DataSource dataSource )
+    private <I> void createResultsFromResultSet( Class<I> clazz, ResultSet resultSet, ArrayList<I> results )
         throws SQLException
     {
         while ( resultSet.next() ) {
-            results.add( createResultFromRow( clazz, resultSet, dataSource ) );
+            results.add( createResultFromRow( clazz, resultSet ) );
         }
     }
 
-    private <I> I createResultFromRow( Class<I> clazz, ResultSet resultSet, DataSource dataSource )
+    private <I> I createResultFromRow( Class<I> clazz, ResultSet resultSet )
         throws SQLException
     {
         try {
-            return createResultFromRowWithError( clazz, resultSet, dataSource );
+            return createResultFromRowWithError( clazz, resultSet );
         } catch ( IllegalAccessException|InstantiationException|NoSuchFieldException cause ) {
             throw new RuntimeException("Unable to execute selection query", cause);
         }
     }
 
-    private <I> I createResultFromRowWithError( Class<I> clazz, ResultSet resultSet, DataSource dataSource )
+    private <I> I createResultFromRowWithError( Class<I> clazz, ResultSet resultSet )
         throws SQLException, IllegalAccessException, InstantiationException, NoSuchFieldException
     {
         I instance = clazz.newInstance();
@@ -282,26 +279,23 @@ public abstract class ActiveRecord<T extends ActiveRecord>
      * // ...
      * // populate matching fields
      * // ...
-     * candidate.delete( dataSource );
+     * candidate.delete();
      * </pre>
      * The corresponding row(s) never exist(s) in database.
-     * @param dataSource Previously configured target database connection.
      * @throws SQLException This may failed, sorry.
      */
-    public void delete( DataSource dataSource )
+    public void delete()
         throws SQLException
     {
         ArrayList<Object> args = new ArrayList<>();
         String query = buildDeletionQuery( args );
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                bindArguments(statement, args);
-                logger().debug("Executing query '{}' with arguments {}", query, args);
-                stopwatch.reset().start();
-                statement.executeUpdate();
-                stopwatch.stop();
-                logger().info( "Executed query '{}' with arguments {} in {} ms", new Object []{query, args, stopwatch.elapsedMillis()});
-            }
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            bindArguments(statement, args);
+            logger().debug("Executing query '{}' with arguments {}", query, args);
+            stopwatch.reset().start();
+            statement.executeUpdate();
+            stopwatch.stop();
+            logger().info( "Executed query '{}' with arguments {} in {} ms", new Object []{query, args, stopwatch.elapsedMillis()});
         }
     }
 

@@ -18,7 +18,7 @@ public class ReadTestCase
         expectedContact.setFirstName("Guillaume");
         expectedContact.setLastName("Wallet");
         expectedContact.setEmail("wallet.guillaume@gmail.com");
-        List<Contact> contacts = expectedContact.find( dataSource );
+        List<Contact> contacts = expectedContact.find();
         assertThat(contacts).hasSize(1);
         expectedContact.setId( 1 );
         assertThat(contacts.get(0)).isEqualTo( expectedContact );
@@ -30,7 +30,7 @@ public class ReadTestCase
     {
         Contact expectedContact = new Contact();
         expectedContact.setId(1);
-        List<Contact> contacts = expectedContact.find( dataSource );
+        List<Contact> contacts = expectedContact.find();
         assertThat(contacts).hasSize(1);
         expectedContact.setFirstName( "Guillaume" );
         expectedContact.setLastName("Wallet");
@@ -44,7 +44,7 @@ public class ReadTestCase
     {
         Contact expectedContact = new Contact();
         expectedContact.setFirstName("Guillaume");
-        List<Contact> contacts = expectedContact.find( dataSource );
+        List<Contact> contacts = expectedContact.find();
         assertThat(contacts).hasSize(3);
     }
 

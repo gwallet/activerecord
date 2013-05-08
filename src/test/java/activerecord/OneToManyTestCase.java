@@ -12,8 +12,8 @@ public class OneToManyTestCase
     public void canListOneToManyRelationship() throws Exception {
         ContactGroup sample = new ContactGroup();
         sample.setId(1);
-        ContactGroup group = sample.find( dataSource ).get(0);
-        assertThat(group.getContacts( dataSource )).hasSize(3);
+        ContactGroup group = sample.find().get(0);
+        assertThat(group.getContacts()).hasSize(3);
     }
 
     @Override

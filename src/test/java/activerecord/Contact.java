@@ -19,11 +19,11 @@ public class Contact
     private String email;
     private Integer groupId;
 
-    public ContactGroup getGroup( DataSource dataSource )
+    public ContactGroup getGroup()
         throws SQLException
     {
         ContactGroup sample = new ContactGroup();
         sample.setId( groupId );
-        return sample.find( dataSource ).get( 0 );
+        return sample.find().get( 0 );
     }
 }

@@ -17,11 +17,11 @@ public class ContactGroup
     private Integer id;
     private String name;
 
-    public List<Contact> getContacts( DataSource dataSource )
+    public List<Contact> getContacts()
         throws SQLException
     {
         Contact sample = new Contact();
         sample.setGroupId( id );
-        return sample.find( dataSource );
+        return sample.find();
     }
 }
