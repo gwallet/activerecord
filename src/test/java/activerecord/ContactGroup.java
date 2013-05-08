@@ -1,10 +1,11 @@
 package activerecord;
 
-import activerecord.annotation.OneToMany;
 import activerecord.annotation.PrimaryKey;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 
 @Data
@@ -15,6 +16,12 @@ public class ContactGroup
     @PrimaryKey
     private Integer id;
     private String name;
-    @OneToMany(targetType = Contact.class, targetForeignKey = "groupId")
-    private List<Contact> contacts;
+
+    public List<Contact> getContacts( DataSource dataSource )
+        throws SQLException
+    {
+        Contact sample = new Contact();
+        sample.setGroupId( id );
+        return sample.find( dataSource );
+    }
 }

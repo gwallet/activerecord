@@ -13,7 +13,7 @@ public class OneToManyTestCase
         ContactGroup sample = new ContactGroup();
         sample.setId(1);
         ContactGroup group = sample.find( dataSource ).get(0);
-        assertThat(group.getContacts()).hasSize(3);
+        assertThat(group.getContacts( dataSource )).hasSize(3);
     }
 
     @Override

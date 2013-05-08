@@ -1,6 +1,5 @@
 package activerecord;
 
-import activerecord.annotation.OneToMany;
 import activerecord.annotation.PrimaryKey;
 import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
@@ -13,10 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import static com.google.common.base.Throwables.propagate;
 
 /**
  * The main purpose of this class is to managed the database relationship of sub-classes instances.
@@ -242,24 +238,10 @@ public abstract class ActiveRecord<T extends ActiveRecord>
     {
         I instance = clazz.newInstance();
         int index = 1;
-        Object primaryKeyValue = null;
         for ( Field field : clazz.getDeclaredFields() ) {
             field.setAccessible( true );
-            OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-            if ( oneToMany != null ) {
-                final Class<? extends ActiveRecord> targetClazz = oneToMany.targetType();
-                ActiveRecord sample = targetClazz.newInstance();
-                Field targetForeignKey = targetClazz.getDeclaredField(oneToMany.targetForeignKey());
-                targetForeignKey.setAccessible( true );
-                targetForeignKey.set( sample, primaryKeyValue );
-                field.set( instance, sample.find( dataSource ) );
-            } else {
-                Object value = resultSet.getObject( index++ );
-                field.set( instance, value );
-                if ( field.getAnnotation( PrimaryKey.class ) != null ) {
-                    primaryKeyValue = value;
-                }
-            }
+            Object value = resultSet.getObject( index++ );
+            field.set( instance, value );
         }
         return instance;
     }
@@ -270,9 +252,6 @@ public abstract class ActiveRecord<T extends ActiveRecord>
             Query.SelectionQuery select = null;
             Query.WhereQuery whereClause = null;
             for ( Field field : clazz.getDeclaredFields() ) {
-                if ( field.getAnnotation( OneToMany.class ) != null ) {
-                    continue;
-                }
                 field.setAccessible(true);
                 Object arg = field.get( this );
                 String fieldName = field.getName();

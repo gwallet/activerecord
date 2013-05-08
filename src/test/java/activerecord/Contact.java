@@ -4,6 +4,9 @@ import activerecord.annotation.PrimaryKey;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Contact
@@ -15,4 +18,12 @@ public class Contact
     private String lastName;
     private String email;
     private Integer groupId;
+
+    public ContactGroup getGroup( DataSource dataSource )
+        throws SQLException
+    {
+        ContactGroup sample = new ContactGroup();
+        sample.setId( groupId );
+        return sample.find( dataSource ).get( 0 );
+    }
 }
